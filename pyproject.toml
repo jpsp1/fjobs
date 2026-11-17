@@ -10,5 +10,7 @@ dependencies = [
     "openai-agents[viz]>=0.15.1",
     "pydantic>=2.13.3",
     "python-dotenv>=1.2.2",
+    "pypdf",
+    "IPython",
 ]
 

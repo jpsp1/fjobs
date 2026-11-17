@@ -21,8 +21,15 @@ $ cd fjobs
 edit .git/config
 
 
+tests/test01.py -   LLM "hello world" test
 
-aaaaaaaaaaa
+tests/test02.py -   read PDF test
+
+tests/test03.py -  pushover external app test (needs API Key)
+
+
+--------------- node and playwright
+
 
 
 git clone https://github.com/jpsp1/fjobs
