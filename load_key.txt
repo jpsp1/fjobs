@@ -1,0 +1,4 @@
+# source  these
+eval $(ssh-agent -s)
+ssh-add $HOME/.ssh/jpsp_20260709
+ssh-add -l
