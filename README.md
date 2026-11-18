@@ -19,11 +19,14 @@ tests/test02.py -   read PDF test
 
 tests/test03.py -  pushover external app test (needs API Key)
 
-tests/test04.py -  usage of tools:
+tests/test04.py -  usage of MCP tools:
      server-filesystem  - open / read / write local files 
      mcp-server-fetch  - fetch URL
     @playwright/mcp@latest  - use browser
     
+tests/test05.py -  usage of MCP tools:	
+     @modelcontextprotocol/server-memory 
+
 ------------------- INSTALL:
 
 $ cd projects 
