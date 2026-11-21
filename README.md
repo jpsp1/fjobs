@@ -15,7 +15,7 @@ several API keys - openai, etc
 
  pyproject.toml =  modules for "uv sync"
 
-load_key.txt  - source this to load the ssh key to push file to the github repository
+load_key.txt  (private stuff) - source this to load the ssh key to push file to the github repository
 
  upload.ssh  -  update from here to the github repository
 
@@ -51,3 +51,9 @@ $ cd fjobs
 edit .git/config
 
 ...and more
+
+------------------- follow up developments:
+- send email
+- Maybe give it better tools for web browsing instead of relying solely on browser mimicry
+- Maybe give it basic tooling for sorting and basic math, as pure LMMs are "only" text predictors
+ 
