@@ -27,6 +27,8 @@ tests/test04.py -  usage of MCP tools:
 tests/test05.py -  usage of MCP tools:	
      @modelcontextprotocol/server-memory 
 
+tests/test06.py -  example os structured outputs with list 
+
 ------------------- INSTALL:
 
 $ cd projects 
