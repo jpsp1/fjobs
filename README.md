@@ -42,6 +42,8 @@ tests/test07.py - mix of MCP (server-filesystem) and a tool to
      run a python script under a container. The LLM invents and
 	 writes de script.
 
+tests/test08.py - send email through "resend". requires API key
+
 fjobs.py - main file
 
 ------------------- INSTALL:
@@ -61,3 +63,4 @@ edit .git/config
 - Maybe give it better tools for web browsing instead of relying solely on browser mimicry
 - Maybe give it basic tooling (MCPs) for sorting and basic math, as pure LMMs are "only" text predictors, or even give it a container do write its own utility code.
 - other LLM? GPT 5.4 kind of pricey for each run
+
