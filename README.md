@@ -56,4 +56,4 @@ edit .git/config
 - send email
 - Maybe give it better tools for web browsing instead of relying solely on browser mimicry
 - Maybe give it basic tooling for sorting and basic math, as pure LMMs are "only" text predictors
- 
+- other LLM? GPT 5.4 kind of pricey for each run
