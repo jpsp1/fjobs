@@ -11,7 +11,7 @@ import asyncio
 from agents import Agent, Runner, trace
 from pydantic import BaseModel, Field
 from typing import List
-from datetime import datetime
+from datetime import datetime, timedelta
 import pprint
 from tools.push import push
 from agents import set_tracing_disabled
@@ -88,7 +88,37 @@ async def main():
 
     pay=2700
 
+    ##################################################
+    # summarize old job offers found in previous reports
+    #
+    print(f"\n\nSearching for old job offers in previous reports in {SANDBOX_PATH}")
 
+    INSTRUCTIONS = """
+    You'r a good local file manipulator and text / json parser
+    """
+
+    TASK = f"""
+    find all files with names starting with "report_on_job_offers_" on the sandbox folder, and produce a text output with one job offer per line, with the following information: tittle_of_offering and URL 
+    Don't repeat lines for the same job offer, if they appear in more than one file.
+    """ 
+    old=None
+    async with MCPServerStdio(params=files_params, client_session_timeout_seconds=120) as mcp_server_files:
+        agent = Agent(
+            name="file_parser",
+            instructions=INSTRUCTIONS,
+            model=MODEL,
+            mcp_servers=[mcp_server_files],            
+            )                
+        with trace("file_parser"):
+            result = await Runner.run(agent, TASK, max_turns=30)                
+        old=result.final_output
+    print(f"Length of old job offers found in previous reports: {len(old)}")
+
+    minimum_date = datetime.now() - timedelta(days=120)
+
+    ##################################################
+    # seek on the first special website 
+    #
     INSTRUCTIONS = """
     You browse the internet to accomplish your instructions.
     Translate from Portuguese to English as needed, and vice versa.
@@ -101,7 +131,7 @@ async def main():
     """
 
     TASK = f"""
-    Find 3 job offers in the Lisbon area, using the first website at the job_sites.txt file in the sandbox folder, and then find 2 more job offers in the Lisbon area using the second website at the job_sites.txt file in the sandbox folder, and so on, until you have found a total of 5 job offers, if possible, ignoring any offers you find in files with names starting with "report_on_job_offers_" on the sandbox folder, as they are reports of previous searches.
+    Find 3 job offers in the Lisbon area, using the first website at the job_sites.txt file in the sandbox folder, ignoring the following  offers: "{old}"  as they are reports of previous searches.
 
         Jobs you seek should be compatible, as much as possible, with the following cv:
     ' {CV_text} '. 
@@ -111,8 +141,6 @@ async def main():
     Jobs you find should be described in the Portuguese language, preferably with monthly salary of at least {pay} euros.
     Exclude any offers related to software engineering, software development or software managment.
 
-
-    Rank the offers by closest to the cv description.
     Use the List_of_offers structured output and write to the jobs.json file in the sandbox.
     """ 
 
@@ -123,6 +151,7 @@ async def main():
     # Use the List_of_offers structured output and write to the jobs.json file in the sandbox.
     # """ 
 
+    print(f"\n\nSearching for new job offers in the first special website www.bep.gov.pt")
 
     async with MCPServerStdio(params=files_params, client_session_timeout_seconds=60) as mcp_server_files:
         async with MCPServerStdio(params=playwright_params, client_session_timeout_seconds=60) as mcp_server_browser:
@@ -145,7 +174,47 @@ async def main():
         f.write(str(result.final_output))
         f.close()
     print(f"Report written to {fn}")
+
+
+    ##################################################
+    # seek on other  websites
+    #
     
+    TASK = f"""
+    Find 3 job offers in the Lisbon area, using the second and third websites at the job_sites.txt file in the sandbox folder, ignoring the following  offers: "{old}"  as they are reports of previous searches.
+
+        Jobs you seek should be compatible, as much as possible, with the following cv:
+    ' {CV_text} '. 
+
+    Jobs you find should be described in the Portuguese language, preferably with monthly salary of at least {pay} euros.
+    Exclude any offers related to software engineering, software development or software managment.
+
+    Use the List_of_offers structured output and write to the jobs.json file in the sandbox.
+    """ 
+
+    print(f"\n\nSearching for new job offers in the second and third websites at the job_sites.txt file in the sandbox folder")
+
+    async with MCPServerStdio(params=files_params, client_session_timeout_seconds=60) as mcp_server_files:
+        async with MCPServerStdio(params=playwright_params, client_session_timeout_seconds=60) as mcp_server_browser:
+            agent = Agent(
+                name="investigator2",
+                instructions=INSTRUCTIONS,
+                model=MODEL,
+                mcp_servers=[mcp_server_files, mcp_server_browser],
+                output_type=List_of_offers,
+                )
+            with trace("investigate2"):
+                result2 = await Runner.run(agent, TASK, max_turns=60)
+
+    with open(f"{fn}", "a", encoding="utf-8") as f:
+        f.write(str(result2.final_output))
+        f.close()
+    print(f"Report updated to {fn}")
+
+    ##################################################
+    # make the report
+    #
+
     INSTRUCTIONS = """
     You produce human readable reports. Clear and concise.
     """
@@ -153,22 +222,27 @@ async def main():
     TASK = f"""
     Produce a human readable report in 2 parts, titled "Job Offers Report", in plain text format, with the following content:
  
-    The first part of the report are new offers found in  following structered output:
-    ' {result.final_output.offers} '
-    Present one line per offer, with the following information: jobs_description_score , tittle_of_offering, institution_who_is_offering, URL, pay_of_offering, date_of_offering.
-    Include a line header with the following information: score , tittle, institution, URL, salary, date.
+    The first part of the report, part one, with tittle new jobs offers, are new offers found in  following structered output:
+    ' {result.final_output.offers} ' and
+    ' {result2.final_output.offers} ' 
+    present all information available, starting with the score, the title, the institution and the URL. Present first the highest score offers, and then the lower score offers.  
+
+    On the second  part of the report, part two, with tittle old jobs offers, present the same information  found in  files  with names starting with "report_on_job_offers_" on the sandbox folder.  
+    Consider only files that are at least 2 hours old.
+    Sort the offfer by the highest score first, and then the lower score offers.
  
-    On the second  part of the report only say the the number  of old offers found in  files  with names starting with "report_on_job_offers_" on the sandbox folder. Don't refer the file names, just say the number of old offers found.
- 
-    Also write your text report to a file in the sandbox folder in a file with name starting with "human_report_{report_date}.txt".
-    Include in the report date of the report, {report_date},   in the format YYYY-MM-DD, 
+     Include in the report date of the report, {report_date},   in the format YYYY-MM-DD, 
     the file name you wrote to, and the number of job offers found.
 
+    Also write your text report to a file in the sandbox folder in a file with name starting with "human_report_{report_date}.txt".
+    
         Don't create the sandbox folder, it already exists.
         Tell the file name of your final output.
     """ 
-    
-  
+
+    print(f"\n\nMaking the report...")
+
+
     async with MCPServerStdio(params=files_params, client_session_timeout_seconds=120) as mcp_server_files:
         agent = Agent(
             name="reporter",
@@ -184,58 +258,8 @@ async def main():
             file_content = f.read()
             f.close()
         print(f"Report written to {fn}")
-        push(file_content) 
-
+        push(f"Job Offers Report. Find a new report at {fn}.")
 
 if __name__ == "__main__":
     asyncio.run(main())
 
-
-    # async with MCPServerStdio(params=files_params, client_session_timeout_seconds=60) as server:
-    #     file_tools = await server.list_tools()    
-    # l=len(file_tools)
-    # if l==None or l==0:
-    #     print(f"Error: No Filesystem tools found. Check that the filesystem server is running and accessible.")
-    #     sys.exit(1)
-    # print(f"Number of Filesystem tools: {len(file_tools)}")
-
-    # async with MCPServerStdio(params=playwright_params, client_session_timeout_seconds=120) as server:
-    #     playwright_tools = await server.list_tools()
-    # l=len(playwright_tools)
-    # if l==None or l==0:
-    #     print(f"Error: No Playwright tools found. Check that the Playwright server is running and accessible.")
-    #     sys.exit(1)     
-    # print(f"Number of Playwright tools: {len(playwright_tools)}")
-
-#         if False:
-#         INSTRUCTIONS = """
-#         You browse the internet to accomplish your instructions.
-#         Translate from Portuguese to English as needed, and vice versa.
-#         Accept cookies and navigate pop-ups as needed.
-#         If one website isn't fruitful, try another.
-#         Be persistent until you have solved your assignment,
-#         trying different options and sites as needed.
-#         When you need to write files, you do that inside the sandbox/ folder only.
-#         Don't create the sandbox folder, it already exists.
-#         """
-#         TASK = f"""
-#         Find the best 5 web sites for job listings in Portugal, with
-#         Portuguese language content.
-#         Write the list of URLs you find to the file job_sites.txt in the sandbox folder. 
-#         Don't create the sandbox folder, it already exists. 
-#         """
-
-#         async with MCPServerStdio(params=files_params, client_session_timeout_seconds=60) as mcp_server_files:
-#             async with MCPServerStdio(params=playwright_params, client_session_timeout_seconds=60) as mcp_server_browser:
-#                 agent = Agent(
-#                     name="find_websites",
-#                     instructions=INSTRUCTIONS,
-#                     model=MODEL_BETTER,
-#                     mcp_servers=[mcp_server_files, mcp_server_browser]
-#                     )
-#                 with trace("find_websites"):
-#                     result = await Runner.run(agent, TASK, max_turns=30)
-#                     print(result.final_output)
-                    
-
-# #https://www.bep.gov.pt/Pages/Oferta/Oferta_Pesquisa.aspx?Mode=1&d=noCookie&utm_source=chatgpt.com

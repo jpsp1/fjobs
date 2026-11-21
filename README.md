@@ -1,4 +1,8 @@
-fjobs - browser the Internet for jobs offerings compatible with a CV and other constraints 
+fjobs - browser the Internet for jobs offers compatible with a CV and other constraints 
+
+---------------------- general requirments
+
+several API keys - openai, etc
 
 ---------------------- FILES:
 
