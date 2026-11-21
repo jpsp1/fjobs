@@ -39,7 +39,8 @@ tests/test05.py -  usage of MCP tools:
 tests/test06.py -  example os structured outputs with list 
 
 tests/test07.py - mix of MCP (server-filesystem) and a tool to
-     run a python script under a container. The LLM writes de script.
+     run a python script under a container. The LLM invents and
+	 writes de script.
 
 fjobs.py - main file
 
