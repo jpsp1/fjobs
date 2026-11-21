@@ -1,14 +1,7 @@
-from dotenv import load_dotenv
-# from openai import AsyncOpenAI
-    
+from dotenv import load_dotenv 
 from agents import Agent, Runner, trace, function_tool, OpenAIChatCompletionsModel, output_guardrail, GuardrailFunctionOutput, ModelSettings
 import os
-# from pydantic import BaseModel, Field
-# from typing import List
 import asyncio
-# from datetime import datetime
-# import pprint
-# from pathlib import Path
 import subprocess
 from agents.mcp import MCPServerStdio
 import sys
@@ -51,6 +44,9 @@ def run_sandbox_python(filename: str) -> str:
     )
     return result.stdout
 
+#############################
+# user must have permissions to run docker commands without sudo.
+# shell test:
 #$ docker run --rm -v "$(pwd)/sandbox/workspace:/workspace" -w /workspace python:3.13-slim python llm_script.py
 #3.141592653589793238462643383279502884197169399375105820974944592307816406286208998628034825342117067982148086513282306647093844609550582231725359408128481117450284102701938521105559644622948954930381
 
@@ -73,7 +69,7 @@ async def main():
     Leave the script in the sandbox folder.
     Run the script and return the output.
     """ 
-    # without this it just wrote the script but did not run it
+    # without this it is tempeted to use the default model settings, which will not allow the run_sandbox_python tool to be used.
     ms=ModelSettings(tool_choice="required")
     async with MCPServerStdio(params=files_params, client_session_timeout_seconds=60) as mcp_server_files:
         p_runner = Agent(
@@ -86,6 +82,15 @@ async def main():
         with trace("p_runner"):
             result = await Runner.run(p_runner, TASK, max_turns=10)
         print(f"Result: {result.final_output}")
+
+
+        #         Result: Done — I wrote `workspace/llm_script.py`, ran it, and it printed π to 1000 decimal places.
+
+        # Output:
+        # ```text
+        # 3.1415926535897932384626433832795028841971693993751058209749445923078164062862089986280348253421170679821480865132823066470938446095505822317253594081284811174502841027019385211055596446229489549303819644288109756659334461284756482337867831652712019091456485669234603486104543266482133936072602491412737245870066063155881748815209209628292540917153643678925903600113305305488204665213841469519415116094330572703657595919530921861173819326117931051185480744623799627495673518857527248912279381830119491298336733624406566430860213949463952247371907021798609437027705392171762931767523846748184676694051320005681271452635608277857713427577896091736371787214684409012249534301465495853710507922796892589235420199561121290219608640344181598136297747713099605187072113499999983729780499510597317328160963185950244594553469083026425223082533446850352619311881710100031378387528865875332083814206171776691473035982534904287554687311595628638823537875937519577818577805321712268066130019278766111959092164201989
+        # ```
+
 
 if __name__ == "__main__":
     asyncio.run(main())
