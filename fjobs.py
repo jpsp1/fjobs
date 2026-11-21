@@ -5,16 +5,16 @@ from openai import OpenAI
 import openai
 from pypdf import PdfReader
 from IPython.display import Markdown, display
-from tools.push import push
+from tools.push import push, send_email
 from agents.mcp import MCPServerStdio
 import asyncio
-from agents import Agent, Runner, trace
+from agents import Agent, Runner, trace, set_tracing_disabled
 from pydantic import BaseModel, Field
 from typing import List
 from datetime import datetime, timedelta
 import pprint
 from tools.push import push
-from agents import set_tracing_disabled
+
 
 
 MODEL="gpt-5.4-mini"
@@ -211,6 +211,9 @@ async def main():
         f.close()
     print(f"Report updated to {fn}")
 
+    Email_to=os.getenv("EMAIL_TO")
+    Email_from=os.getenv("EMAIL_FROM")
+
     ##################################################
     # make the report
     #
@@ -238,10 +241,13 @@ async def main():
     
         Don't create the sandbox folder, it already exists.
         Tell the file name of your final output.
+
+    Using the send_email tool, send a  email to {Email_to}
+    from {Email_from}
+    with the subject "Job Offers Report" and the body of the email being the text report you produced.
     """ 
 
     print(f"\n\nMaking the report...")
-
 
     async with MCPServerStdio(params=files_params, client_session_timeout_seconds=120) as mcp_server_files:
         agent = Agent(
@@ -249,7 +255,7 @@ async def main():
             instructions=INSTRUCTIONS,
             model=MODEL,
             mcp_servers=[mcp_server_files],
-            
+            tools=[send_email],
             )        
         set_tracing_disabled(True)
         result = await Runner.run(agent, TASK, max_turns=30)                
@@ -258,7 +264,7 @@ async def main():
             file_content = f.read()
             f.close()
         print(f"Report written to {fn}")
-        push(f"Job Offers Report. Find a new report at {fn}.")
+        push(f"Job Offers Report\n\n Find a new report at {fn}\n\n Email sent to {Email_to}")
 
 if __name__ == "__main__":
     asyncio.run(main())
