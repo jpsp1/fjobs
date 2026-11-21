@@ -43,6 +43,7 @@ tests/test07.py - mix of MCP (server-filesystem) and a tool to
 	 writes de script.
 
 tests/test08.py - send email through "resend". requires API key
+tests/test08b.py - with a proper tool. Not tested . Needs work/test
 
 fjobs.py - main file
 
