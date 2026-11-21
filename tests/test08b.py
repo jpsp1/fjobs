@@ -1,11 +1,13 @@
 ##############################
-# this script is not tested
 # as test08.py but with a proper tool, courtesy of Gemini
 ########################################
 import asyncio
 import os
 import resend
 from agents import Agent, Runner, function_tool
+from dotenv import load_dotenv 
+
+load_dotenv(override=True)
 
 # Configure API keys from environment variables
 resend.api_key = os.environ["RESEND_API_KEY"]
@@ -64,7 +66,7 @@ email_agent = Agent(
 async def main():
     result = await Runner.run(
         email_agent,
-        "Send a quick welcome email to alex@example.com letting them know their account is active.",
+        "Send a quick welcome email to to joao.pagaime@gmail.com from joao.pagaime@resend.dev letting them know their account is active.",
     )
     print(result.final_output)
 
