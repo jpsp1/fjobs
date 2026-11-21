@@ -1,4 +1,7 @@
-fjobs - browser the Internet for jobs offers compatible with a CV and other constraints 
+fjobs - browser the Internet for jobs offers compatible with a CV and other constraints. Make a report of it, separating new offers from old offers
+
+                 nov 2026, João Pagaime
+				 (credits on snippets to Ed Donner's wonderful online course on agentic AI)
 
 https://github.com/jpsp1/fjobs
 
