@@ -1,5 +1,7 @@
 fjobs - browser the Internet for jobs offers compatible with a CV and other constraints 
 
+https://github.com/jpsp1/fjobs
+
 ---------------------- general requirments
 
 several API keys - openai, etc
@@ -33,6 +35,8 @@ tests/test05.py -  usage of MCP tools:
 
 tests/test06.py -  example os structured outputs with list 
 
+fjobs.py - main file
+
 ------------------- INSTALL:
 
 $ cd projects 
@@ -43,65 +47,4 @@ $ cd fjobs
 
 edit .git/config
 
-
-
-
-
---------------- node and playwright
-
-$ npx -y playwright@latest screenshot --channel=chrome https://news.ycombinator.com playwright_check.png
-Error: command.parse: Chromium distribution 'chrome' is not found at /opt/google/chrome/chrome
-Run "npx playwright install chrome"
-
-aaaaaaaaaaaaaa
-WARNING: It looks like you are running 'npx playwright install' without first ║
-║ installing your project's dependencies.                                       ║
-║                                                                               ║
-║ To avoid unexpected behavior, please install your dependencies first, and     ║
-║ then run Playwright's install command:                                        ║
-║                                                                               ║
-║     npm install                                                               ║
-║     npx playwright install                                                    ║
-║                                                                               ║
-║ If your project does not yet depend on Playwright, first install the          ║
-║ applicable npm package (most commonly @playwright/test), and                  ║
-║ then run Playwright's install command to download the browsers:               ║
-║                                                                               ║
-║     npm install @playwright/test                                              ║
-║     npx playwright install                  
-
-------------------- $ which chromium
-chromium --version
-/usr/bin/chromium
-Chromium 156.0.8078.79 built on Debian GNU/Linux 12 (bookworm)
-
-
---------------$ npm install playwright
-
-added 2 packages in 2s
-
-
-aaaaaaaaaaaaaaaaa
-
-git clone https://github.com/jpsp1/fjobs
-
-cat .git/config
-[core]
-	repositoryformatversion = 0
-	filemode = true
-	bare = false
-	logallrefupdates = true
-[remote "origin"]
-	url = git@github.com:jpsp1/fjobs
-	fetch = +refs/heads/*:refs/remotes/origin/*
-[branch "main"]
-	remote = origin
-	vscode-merge-base = origin/main
-	merge = refs/heads/main
-[user]
-	email = joao.pagaime@gmail.com
-	name = joao.pagaime@gmail,com
-
-
-aaaaaaaaaaaaa
-
+...and more
